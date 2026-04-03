@@ -1,0 +1,57 @@
+{% extends 'core/base.html' %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card fade-in">
+            <div class="card-body">
+                <div class="mb-4">
+                    <h4 class="card-title">
+                        <i class="fas fa-plus-circle icon-blue"></i> {{ title }}
+                    </h4>
+                    <p class="text-muted small"><i class="fas fa-info-circle"></i> Fill in all the required details below</p>
+                </div>
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    {{ form.non_field_errors }}
+                    <div class="row g-3">
+                        <div class="col-md-6 zoom-in" style="animation-delay: 0.1s;">
+                            <label for="id_name" class="form-label"><i class="fas fa-briefcase icon-blue"></i> Service Name</label>
+                            {{ form.name }}
+                            {% if form.name.errors %}<div class="alert alert-danger mt-2">{{ form.name.errors }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-6 zoom-in" style="animation-delay: 0.2s;">
+                            <label for="id_charges" class="form-label"><i class="fas fa-indian-rupee-sign icon-green"></i> Service Charges</label>
+                            {{ form.charges }}
+                            {% if form.charges.errors %}<div class="alert alert-danger mt-2">{{ form.charges.errors }}</div>{% endif %}
+                        </div>
+                        <div class="col-12 zoom-in" style="animation-delay: 0.3s;">
+                            <label for="id_documents_required" class="form-label"><i class="fas fa-file-alt icon-orange"></i> Documents Required</label>
+                            {{ form.documents_required }}
+                            {% if form.documents_required.errors %}<div class="alert alert-danger mt-2">{{ form.documents_required.errors }}</div>{% endif %}
+                        </div>
+                        <div class="col-12 zoom-in" style="animation-delay: 0.4s;">
+                            <label for="id_tutorial_link" class="form-label"><i class="fab fa-youtube icon-red"></i> YouTube Tutorial Link</label>
+                            {{ form.tutorial_link }}
+                            {% if form.tutorial_link.errors %}<div class="alert alert-danger mt-2">{{ form.tutorial_link.errors }}</div>{% endif %}
+                        </div>
+                        <div class="col-12 zoom-in" style="animation-delay: 0.5s;">
+                            <label for="id_apply_link" class="form-label"><i class="fas fa-link icon-blue"></i> Apply Now Link</label>
+                            {{ form.apply_link }}
+                            {% if form.apply_link.errors %}<div class="alert alert-danger mt-2">{{ form.apply_link.errors }}</div>{% endif %}
+                        </div>
+                    </div>
+                    <div class="mt-4 d-flex gap-2">
+                        <button type="submit" class="btn btn-primary bounce-in">
+                            <i class="fas fa-check"></i> Submit
+                        </button>
+                        <a href="{% url 'dashboard' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

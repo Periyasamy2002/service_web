@@ -1,0 +1,425 @@
+{% extends 'core/base.html' %}
+{% load custom_filters %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+
+<style>
+    * {
+        font-family: 'Poppins', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    body {
+        background-color: #f9fafb;
+    }
+
+    .service-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .service-card:hover {
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+        transform: translateY(-8px);
+    }
+
+    .card-header-btn {
+        transition: all 0.3s ease;
+        flex-shrink: 0;
+    }
+
+    .card-header-btn:hover {
+        background-color: #3b82f6;
+        transform: scale(1.1);
+    }
+
+    .accordion-btn-icon {
+        transition: transform 0.3s ease;
+        flex-shrink: 0;
+    }
+
+    .accordion-btn-icon.active {
+        transform: rotate(180deg);
+    }
+
+    .accordion-content {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease-out;
+    }
+
+    .accordion-content.active {
+        max-height: 400px;
+        transition: max-height 0.4s ease-in;
+    }
+
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+        z-index: 50;
+        padding: 16px;
+    }
+
+    .modal-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .modal-content {
+        background-color: white;
+        border-radius: 16px;
+        padding: 40px;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        max-width: 500px;
+        width: 100%;
+        transform: scale(0.9);
+        transition: transform 0.3s ease;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .modal-overlay.active .modal-content {
+        transform: scale(1);
+    }
+
+    .input-field {
+        width: 100%;
+        padding: 10px 16px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+    }
+
+    .input-field:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        outline: none;
+    }
+
+    .btn-hover-primary:hover {
+        background-color: #059669;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(5, 150, 105, 0.3);
+    }
+
+    .btn-hover-red:hover {
+        background-color: #ef4444;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-hover-gray:hover {
+        background-color: #e5e7eb;
+    }
+
+    .fade-in {
+        animation: fadeInUp 0.6s ease-out forwards;
+        opacity: 0;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Ensure proper alignment */
+    .card-inner {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .card-body-content {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .card-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: auto;
+    }
+
+    .card-actions button,
+    .card-actions a {
+        flex: 1;
+        padding: 10px 12px;
+        border-radius: 8px;
+        font-weight: 500;
+        text-align: center;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        white-space: nowrap;
+    }
+
+    .card-footer {
+        border-top: 1px solid #f3f4f6;
+        padding: 12px 24px;
+        background-color: #f9fafb;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .header-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .header-title {
+        flex-grow: 1;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        overflow: hidden;
+    }
+
+    .header-title h3 {
+        margin: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    @media (max-width: 640px) {
+        .modal-content {
+            padding: 24px;
+        }
+
+        .card-actions button span,
+        .card-actions a span {
+            font-size: 12px;
+        }
+
+        .card-footer {
+            padding: 10px 16px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+    }
+</style>
+
+<div class="min-h-screen py-8 px-4 sm:px-6 lg:px-8" style="background-color: #f9fafb;">
+    <div style="max-width: 1280px; margin: 0 auto;">
+        <!-- Header -->
+        <div style="margin-bottom: 48px;">
+            <h1 style="font-size: 36px; font-weight: 700; color: #111827; margin-bottom: 8px;">Services Dashboard</h1>
+            <p style="color: #4b5563; font-size: 16px;">Manage and explore our comprehensive service offerings</p>
+        </div>
+
+        <!-- Cards Grid -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px;">
+            {% for service in services %}
+                <div class="fade-in service-card" style="animation-delay: {{ forloop.counter|add:'-1'|mul:'0.1' }}s;">
+                    <div class="card-inner" style="background-color: white; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow: hidden;">
+                        
+                        <!-- Card Header -->
+                        <div style="background: linear-gradient(to right, #eff6ff, #e0e7ff); padding: 16px; border-bottom: 1px solid #f3f4f6; display: flex; justify-content: space-between; align-items: center;">
+                            <div class="header-title">
+                                <i class="fas fa-briefcase" style="color: #2563eb; font-size: 18px;"></i>
+                                <h3 style="font-size: 18px; font-weight: 600; color: #111827; margin: 0;">{{ service.name }}</h3>
+                            </div>
+                            {% if can_manage %}
+                                <button class="card-header-btn" style="background-color: #3b82f6; color: white; padding: 8px; border-radius: 8px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;" onclick="openEditModal({{ service.id }}, '{{ service.name|escapejs }}', {{ service.charges }}, '{{ service.documents_required|escapejs }}')">
+                                    <svg class="w-5 h-5" style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                    </svg>
+                                </button>
+                            {% endif %}
+                        </div>
+
+                        <!-- Card Content -->
+                        <div class="card-body-content" style="padding: 24px;">
+                            <!-- Price Section -->
+                            <div style="margin-bottom: 24px;">
+                                <p style="color: #6b7280; font-size: 14px; margin: 0 0 8px 0;">Price</p>
+                                <p style="font-size: 28px; font-weight: 700; color: #10b981; margin: 0;">₹{{ service.charges }}</p>
+                            </div>
+
+                            <!-- Accordion -->
+                            <div style="margin-bottom: 24px;">
+                                <button style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background-color: #f3f4f6; border-radius: 8px; border: none; cursor: pointer; font-weight: 500; color: #111827; transition: all 0.2s;" class="accordion-toggle" onclick="toggleAccordion(this, {{ service.id }})" onmouseover="this.style.backgroundColor='#e5e7eb'" onmouseout="this.style.backgroundColor='#f3f4f6'">
+                                    <span style="display: flex; align-items: center; gap: 8px; text-align: left;">
+                                        <i class="fas fa-file-alt" style="color: #f97316; font-size: 16px;"></i>
+                                        <span>Documents Required</span>
+                                    </span>
+                                    <svg class="accordion-btn-icon" style="width: 20px; height: 20px; color: #6b7280; flex-shrink: 0;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                                    </svg>
+                                </button>
+                                <div class="accordion-content" id="accordion-{{ service.id }}">
+                                    <div style="margin-top: 12px; display: flex; flex-direction: column; gap: 8px; padding: 0 8px;">
+                                        {% for doc in service.documents_required|split:',' %}
+                                            <div style="display: flex; align-items: center; padding: 8px; background-color: #eff6ff; border-radius: 8px;">
+                                                <svg style="width: 16px; height: 16px; color: #2563eb; margin-right: 8px; flex-shrink: 0;" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                                </svg>
+                                                <span style="font-size: 14px; color: #1f2937;">{{ doc|strip }}</span>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="card-actions">
+                                {% if service.tutorial_link %}
+                                    <a href="{{ service.tutorial_link }}" target="_blank" style="background-color: #ef4444; color: white;" class="btn-hover-red">
+                                        <i class="fas fa-play-circle"></i>
+                                        <span class="hidden sm:inline">Tutorial</span>
+                                    </a>
+                                {% else %}
+                                    <button style="background-color: #d1d5db; color: #6b7280; cursor: not-allowed; opacity: 0.5;" disabled>
+                                        <i class="fas fa-play-circle"></i>
+                                        <span class="hidden sm:inline">Tutorial</span>
+                                    </button>
+                                {% endif %}
+                                
+                                {% if service.apply_link %}
+                                    <a href="{{ service.apply_link }}" target="_blank" style="background-color: #16a34a; color: white;" class="btn-hover-primary">
+                                        <i class="fas fa-paper-plane"></i>
+                                        <span class="hidden sm:inline">Apply</span>
+                                    </a>
+                                {% else %}
+                                    <button style="background-color: #d1d5db; color: #6b7280; cursor: not-allowed; opacity: 0.5;" disabled>
+                                        <i class="fas fa-paper-plane"></i>
+                                        <span class="hidden sm:inline">Apply</span>
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Card Footer -->
+                        <div class="card-footer">
+                            <small style="color: #6b7280; font-size: 13px; display: flex; align-items: center; gap: 4px;">
+                                <i class="fas fa-user-circle"></i>
+                                {% if service.created_by %}{{ service.created_by.username }}{% else %}Unknown{% endif %}
+                            </small>
+                            {% if can_manage %}
+                                <a href="{% url 'delete_service' service.id %}" style="color: #dc2626; text-decoration: none; font-weight: 500; font-size: 13px;" title="Delete">
+                                    <i class="fas fa-trash-alt"></i>
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div style="grid-column: 1 / -1;">
+                    <div style="text-align: center; padding: 48px 16px;">
+                        <i class="fas fa-inbox" style="color: #d1d5db; font-size: 48px; display: block; margin-bottom: 16px;"></i>
+                        <p style="color: #6b7280; font-size: 18px; margin: 0;">No services found. Add one to begin.</p>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div id="editModal" class="modal-overlay">
+    <div class="modal-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            <h2 style="font-size: 24px; font-weight: 700; color: #111827; margin: 0;">Edit Service</h2>
+            <button onclick="closeEditModal()" style="background: none; border: none; cursor: pointer; color: #9ca3af; font-size: 24px; padding: 0;">
+                <svg style="width: 24px; height: 24px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+
+        <form id="editForm" onsubmit="handleSaveService(event)">
+            <input type="hidden" id="serviceId">
+            
+            <div style="margin-bottom: 16px;">
+                <label style="display: block; color: #374151; font-weight: 500; margin-bottom: 8px;">Service Title</label>
+                <input type="text" id="serviceTitle" class="input-field" placeholder="Enter service title" required>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+                <label style="display: block; color: #374151; font-weight: 500; margin-bottom: 8px;">Price (₹)</label>
+                <input type="number" id="servicePrice" class="input-field" placeholder="Enter price" required>
+            </div>
+
+            <div style="margin-bottom: 24px;">
+                <label style="display: block; color: #374151; font-weight: 500; margin-bottom: 8px;">Documents Required</label>
+                <textarea id="serviceDocuments" class="input-field" style="resize: vertical; min-height: 120px;" rows="4" placeholder="Enter documents (one per line)"></textarea>
+            </div>
+
+            <div style="display: flex; gap: 12px;">
+                <button type="submit" style="flex: 1; background-color: #16a34a; color: white; font-weight: 500; padding: 12px 16px; border-radius: 8px; border: none; cursor: pointer; transition: all 0.3s;" class="btn-hover-primary">
+                    Save Changes
+                </button>
+                <button type="button" onclick="closeEditModal()" style="flex: 1; background-color: #e5e7eb; color: #1f2937; font-weight: 500; padding: 12px 16px; border-radius: 8px; border: none; cursor: pointer; transition: all 0.3s;" class="btn-hover-gray">
+                    Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openEditModal(serviceId, name, price, documents) {
+        document.getElementById('serviceId').value = serviceId;
+        document.getElementById('serviceTitle').value = name;
+        document.getElementById('servicePrice').value = price;
+        document.getElementById('serviceDocuments').value = documents.replace(/,/g, '\n');
+        document.getElementById('editModal').classList.add('active');
+    }
+
+    function closeEditModal() {
+        document.getElementById('editModal').classList.remove('active');
+    }
+
+    function handleSaveService(event) {
+        event.preventDefault();
+        const title = document.getElementById('serviceTitle').value;
+        alert(`Service "${title}" updated successfully!`);
+        closeEditModal();
+        // In production, send to backend via AJAX
+    }
+
+    function toggleAccordion(btn, serviceId) {
+        const icon = btn.querySelector('.accordion-btn-icon');
+        const content = document.getElementById(`accordion-${serviceId}`);
+        
+        icon.classList.toggle('active');
+        content.classList.toggle('active');
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('editModal').addEventListener('click', function(event) {
+        if (event.target === this) {
+            closeEditModal();
+        }
+    });
+</script>
+
+{% endblock %}

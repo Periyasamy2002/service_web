@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}Service Management{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+        /* Global Reset & Base */
+        * { transition: color 0.2s, background-color 0.2s; }
+        body { 
+            min-height: 100vh; 
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        /* Navbar Enhancement */
+        .navbar { 
+            background: linear-gradient(90deg, #2c3e50 0%, #34495e 100%) !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            animation: slideDown 0.5s ease-out;
+            padding: 1rem 0 !important;
+            height: 80px;
+            display: flex;
+            align-items: center;
+        }
+        .navbar-brand { 
+            font-weight: 700; 
+            font-size: 1.4rem;
+            letter-spacing: 0.5px;
+            color: white !important;
+            transition: all 0.3s ease;
+        }
+        .navbar-brand:hover {
+            text-shadow: 0 0 10px rgba(0, 191, 255, 0.5);
+            transform: scale(1.05);
+        }
+        .nav-link { 
+            position: relative;
+            overflow: hidden;
+            color: white !important;
+            font-weight: 500;
+            padding: 0.6rem 1rem !important;
+        }
+        .nav-link::after { 
+            content: ''; 
+            position: absolute; 
+            bottom: -2px; 
+            left: 0; 
+            width: 0; 
+            height: 2px; 
+            background: #00bfff; 
+            transition: width 0.3s ease;
+        }
+        .nav-link:hover::after { width: 100%; }
+        .nav-link:hover {
+            color: #00bfff !important;
+        }
+        
+        /* Navbar Auth Info */
+        .navbar-auth {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        .user-info {
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .user-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 0.35rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        
+        /* Sidebar Styling */
+        .sidebar { 
+            min-width: 220px; 
+            max-width: 260px; 
+            background: linear-gradient(180deg, #ecf0f1 0%, #bdc3c7 100%);
+            box-shadow: inset -2px 0 8px rgba(0,0,0,0.05);
+            border-right: 3px solid #3498db;
+            min-height: calc(100vh - 60px);
+            position: sticky;
+            top: 60px;
+            overflow-y: auto;
+        }
+        .sidebar .nav-link { 
+            color: #2c3e50;
+            padding: 0.75rem 1rem;
+            margin: 0.25rem 0;
+            border-radius: 8px;
+            position: relative;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .sidebar .nav-link:hover { 
+            background: rgba(52, 152, 219, 0.1);
+            transform: translateX(5px);
+            color: #3498db;
+            box-shadow: inset 2px 0 0 #3498db;
+        }
+        .sidebar .nav-link.active { 
+            background: linear-gradient(90deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+        }
+        
+        /* Main Content */
+        main { background: rgba(255, 255, 255, 0.9); border-radius: 12px; }
+        
+        /* Container Alignment */
+        .container-fluid {
+            padding: 1.5rem 0.5rem;
+        }
+        
+        /* Row Alignment */
+        .row {
+            margin-left: 0;
+            margin-right: 0;
+        }
+        
+        /* Cards - Enhanced */
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            overflow: hidden;
+            position: relative;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.320, 1);
+        }
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+        .card:hover::before { left: 100%; }
+        .card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 12px 24px rgba(52, 152, 219, 0.2);
+        }
+        .card-title { 
+            color: #2c3e50; 
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+        }
+        .card-body { padding: 1.5rem; }
+        .card-footer { 
+            background: rgba(249, 249, 249, 0.8);
+            border-top: 1px solid rgba(52, 152, 219, 0.1);
+        }
+        
+        /* Buttons - Enhanced */
+        .btn {
+            border-radius: 8px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            transition: left 0.3s;
+        }
+        .btn:hover::before { left: 100%; }
+        .btn-primary { 
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            border: none;
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+        }
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(52, 152, 219, 0.4);
+            background: linear-gradient(135deg, #2980b9 0%, #1a569b 100%);
+        }
+        .btn-success { 
+            background: linear-gradient(135deg, #27ae60 0%, #1e8449 100%);
+            border: none;
+            box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+        }
+        .btn-success:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(39, 174, 96, 0.4);
+        }
+        .btn-danger { 
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            border: none;
+            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+        }
+        .btn-danger:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(231, 76, 60, 0.4);
+        }
+        .btn-outline-primary {
+            border: 2px solid #3498db;
+            color: #3498db;
+        }
+        .btn-outline-primary:hover {
+            background: #3498db;
+            color: white;
+            transform: scale(1.05);
+        }
+        
+        /* Links */
+        a { 
+            color: #3498db; 
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        a:hover { 
+            color: #2980b9;
+            text-decoration: underline;
+        }
+        a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #3498db;
+            transition: width 0.3s ease;
+        }
+        a:hover::after { width: 100%; }
+        
+        /* Forms */
+        .form-control, .form-select {
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+            background: white;
+        }
+        .form-label {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Table Enhancement */
+        .table {
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .table-striped tbody tr {
+            transition: all 0.3s ease;
+        }
+        .table-striped tbody tr:hover {
+            background: rgba(52, 152, 219, 0.1);
+            transform: scale(1.01);
+        }
+        .table thead {
+            background: linear-gradient(90deg, #34495e 0%, #2c3e50 100%);
+            color: white;
+            font-weight: 700;
+        }
+        
+        /* ===== ANIMATIONS ===== */
+        
+        /* Fade In */
+        .fade-in {
+            animation: fadeIn 0.6s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Slide In Left */
+        .slide-in-left {
+            animation: slideInLeft 0.6s ease-out;
+        }
+        @keyframes slideInLeft {
+            from { transform: translateX(-100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        /* Slide Down */
+        @keyframes slideDown {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        /* Bounce In */
+        .bounce-in {
+            animation: bounceIn 0.6s ease-out;
+        }
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            40% { transform: scale(1.08); }
+            60% { transform: scale(0.95); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        /* Pulse */
+        .pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        /* Glow */
+        .glow {
+            animation: glow 2s ease-in-out infinite;
+        }
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 5px rgba(52, 152, 219, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(52, 152, 219, 0.8); }
+        }
+        
+        /* Shimmer */
+        .shimmer {
+            animation: shimmer 2s infinite;
+        }
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+        
+        /* Flip */
+        .flip {
+            animation: flip 0.6s ease-out;
+            transform-style: preserve-3d;
+        }
+        @keyframes flip {
+            from { transform: rotateY(90deg); opacity: 0; }
+            to { transform: rotateY(0); opacity: 1; }
+        }
+        
+        /* Zoom In */
+        .zoom-in {
+            animation: zoomIn 0.5s ease-out;
+        }
+        @keyframes zoomIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        
+        /* Rotate In */
+        .rotate-in {
+            animation: rotateIn 0.6s ease-out;
+        }
+        @keyframes rotateIn {
+            from { transform: rotate(-180deg); opacity: 0; }
+            to { transform: rotate(0); opacity: 1; }
+        }
+        
+        /* Floating Add Service Button */
+        .fab {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 28px;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(52, 152, 219, 0.4);
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.320, 1);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: bounce 0.6s ease-out;
+        }
+        .fab:hover {
+            transform: scale(1.15) rotate(90deg);
+            box-shadow: 0 12px 30px rgba(52, 152, 219, 0.6);
+        }
+        .fab::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes bounce {
+            0% { transform: scale(0) translateY(100px); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        /* Alert Animations */
+        .alert {
+            border: none;
+            border-radius: 8px;
+            animation: slideDown 0.5s ease-out;
+        }
+        .alert-success {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            color: #155724;
+            border-left: 4px solid #27ae60;
+        }
+        .alert-danger {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            color: #721c24;
+            border-left: 4px solid #e74c3c;
+        }
+        .alert-warning {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+            color: #856404;
+            border-left: 4px solid #f39c12;
+        }
+        .alert-info {
+            background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+            color: #0c5460;
+            border-left: 4px solid #3498db;
+        }
+        
+        /* Icon Styling */
+        .icon-sm { font-size: 1rem; margin-right: 0.5rem; }
+        .icon-md { font-size: 1.5rem; margin-right: 0.75rem; }
+        .icon-lg { font-size: 2rem; margin-right: 1rem; }
+        .icon-blue { color: #3498db; }
+        .icon-green { color: #27ae60; }
+        .icon-red { color: #e74c3c; }
+        .icon-orange { color: #f39c12; }
+        
+        /* Badge Enhancement */
+        .badge {
+            border-radius: 20px;
+            padding: 0.5rem 0.75rem;
+            font-weight: 600;
+        }
+        
+        /* Delay classes for staggered animations */
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; }
+        
+        .btn-outline-danger {
+            border: 2px solid #e74c3c;
+            color: #e74c3c;
+            transition: all 0.3s ease;
+        }
+        .btn-outline-danger:hover {
+            background: #e74c3c !important;
+            color: white !important;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+        }
+        
+        /* Responsive sidebar */
+        @media (max-width: 768px) {
+            .sidebar { 
+                min-width: 100%; 
+                max-width: 100%; 
+                margin-bottom: 1rem;
+                min-height: auto;
+                position: relative;
+                top: 0;
+            }
+            main {
+                padding: 1.5rem 0.75rem !important;
+            }
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{% url 'dashboard' %}">
+            <i class="fas fa-cube me-2"></i>Service Manager
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTop" aria-controls="navbarTop" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarTop">
+            <ul class="navbar-nav ms-auto align-items-center">
+                {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'dashboard' %}" title="Go to Dashboard">
+                            <i class="fas fa-home me-2"></i>Home
+                        </a>
+                    </li>
+                    {% if can_manage %}
+                        <li class="nav-item"><a class="nav-link" href="{% url 'add_service' %}"><i class="fas fa-plus me-2"></i>Add Service</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'add_page' %}"><i class="fas fa-file-plus me-2"></i>Add Page</a></li>
+                    {% endif %}
+                    
+                    <li class="nav-item ms-3 ps-3 border-start border-secondary">
+                        <span class="user-badge">
+                            <i class="fas fa-user-circle me-2"></i>
+                            <strong>{{ user.username }}</strong>
+                        </span>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link btn btn-outline-danger ms-2" href="{% url 'logout' %}" title="Logout">
+                            <i class="fas fa-sign-out-alt me-2"></i>Logout
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="nav-item"><a class="nav-link" href="{% url 'login' %}"><i class="fas fa-sign-in-alt me-2"></i>Login</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'register' %}"><i class="fas fa-user-plus me-2"></i>Register</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
+<div class="container-fluid">
+    <div class="row">
+        <aside class="col-lg-2 sidebar border-end p-3 slide-in-left">
+            {% if user.is_authenticated %}
+                <div class="mb-4 pb-3 border-bottom">
+                    <div class="text-center">
+                        <i class="fas fa-user-circle fa-2x icon-blue mb-3 d-block"></i>
+                        <h6 class="mb-1 text-dark">{{ user.first_name|default:user.username }}</h6>
+                        <small class="text-muted d-block">{{ user.profile.role|title }}</small>
+                    </div>
+                </div>
+            {% endif %}
+            
+            <h5 class="mb-3"><i class="fas fa-bars icon-blue me-2"></i>Menu</h5>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'dashboard' %}">
+                        <i class="fas fa-home me-2"></i>Home
+                    </a>
+                </li>
+                {% if user.is_authenticated and can_manage %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'add_service' %}">
+                            <i class="fas fa-plus-circle me-2 icon-blue"></i>Add Service
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'add_page' %}">
+                            <i class="fas fa-file-alt me-2 icon-blue"></i>Add Page
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'user_list' %}">
+                            <i class="fas fa-users me-2 icon-blue"></i>Users
+                        </a>
+                    </li>
+                {% endif %}
+                
+                {% if pages %}
+                    <li class="nav-item mt-3 pt-3 border-top">
+                        <span class="small text-muted"><i class="fas fa-layer-group me-1"></i>Custom Pages</span>
+                    </li>
+                    {% for p in pages %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'dynamic_page' p.slug %}">
+                                <i class="fas fa-file me-2"></i>{{ p.name }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                {% else %}
+                    <li class="nav-item mt-3 pt-3 border-top">
+                        <span class="text-muted small d-block"><i class="fas fa-inbox me-1"></i>No custom pages yet</span>
+                    </li>
+                {% endif %}
+            </ul>
+        </aside>
+        <main class="col-lg-10 p-4 fade-in">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                    <h1>{% block page_title %}{{ page_title|default:'Service Management' }}{% endblock %}</h1>
+                    <p class="text-muted">{% block page_description %}{{ page_description|default:'Manage your services here.' }}{% endblock %}</p>
+                </div>
+                {% if user.is_authenticated and can_manage %}
+                    <div><a class="btn btn-primary" href="{% url 'add_service' %}">Add Service</a></div>
+                {% endif %}
+            </div>
+
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+</div>
+{% if user.is_authenticated and can_manage %}
+    <a href="{% url 'add_service' %}" class="fab" title="Add Service">+</a>
+{% endif %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+{% extends 'core/base.html' %}
+{% block title %}Add Page{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card mb-4 fade-in">
+            <div class="card-body">
+                <div class="mb-4">
+                    <h4 class="card-title">
+                        <i class="fas fa-file-plus icon-blue"></i> Create New Page
+                    </h4>
+                    <p class="text-muted small"><i class="fas fa-lightbulb"></i> Add a custom page to your site</p>
+                </div>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3 zoom-in" style="animation-delay: 0.1s;">
+                        <label class="form-label"><i class="fas fa-heading icon-blue"></i> {{ form.name.label_tag }}</label>
+                        {{ form.name }}
+                    </div>
+                    <div class="mb-3 zoom-in" style="animation-delay: 0.2s;">
+                        <label class="form-label"><i class="fas fa-align-left icon-blue"></i> {{ form.description.label_tag }}</label>
+                        {{ form.description }}
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary bounce-in">
+                            <i class="fas fa-save"></i> Create Page
+                        </button>
+                        <a href="{% url 'dashboard' %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
