@@ -41,6 +41,13 @@ ALLOWED_HOSTS = [
 ]
 
 
+# CSRF Trusted Origins
+CSRF_TRUSTED_ORIGINS = [
+    'https://service-web-rkha.onrender.com',
+    'https://*.onrender.com',
+]
+
+
 # Application definition
 
 INSTALLED_APPS = [
