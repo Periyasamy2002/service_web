@@ -8,13 +8,14 @@ from .models import DynamicPage, Service
 class ServiceForm(forms.ModelForm):
     class Meta:
         model = Service
-        fields = ["name", "charges", "documents_required", "tutorial_link", "apply_link"]
+        fields = ["name", "charges", "documents_required", "tutorial_link", "apply_link", "page"]
         widgets = {
             "name": forms.TextInput(attrs={"class": "form-control form-control-lg", "placeholder": "Enter service name"}),
             "charges": forms.NumberInput(attrs={"class": "form-control form-control-lg", "step": "0.01", "placeholder": "Enter amount"}),
             "documents_required": forms.TextInput(attrs={"class": "form-control form-control-lg", "placeholder": "Aadhar, PAN, Photo"}),
             "tutorial_link": forms.URLInput(attrs={"class": "form-control form-control-lg", "placeholder": "https://example.com"}),
             "apply_link": forms.URLInput(attrs={"class": "form-control form-control-lg", "placeholder": "https://example.com"}),
+            "page": forms.Select(attrs={"class": "form-control form-control-lg"}),
         }
 
 

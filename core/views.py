@@ -107,7 +107,8 @@ def dashboard(request):
         pass
     
     # Get base context data
-    services = Service.objects.all().order_by("-created_at")
+    # Only show global services (without a page assigned) on dashboard
+    services = Service.objects.filter(page__isnull=True).order_by("-created_at")
     pages = DynamicPage.objects.all().order_by("name")
     
     # Filter services based on search query
@@ -151,6 +152,16 @@ def add_service(request):
         messages.error(request, "You do not have permission to add services.")
         return redirect("dashboard")
 
+    # Get page_id from query parameter if provided (for adding from a dynamic page)
+    page_id = request.GET.get('page_id')
+    initial_data = {}
+    if page_id:
+        try:
+            page = DynamicPage.objects.get(id=page_id)
+            initial_data['page'] = page
+        except DynamicPage.DoesNotExist:
+            pass
+
     if request.method == "POST":
         form = ServiceForm(request.POST)
         if form.is_valid():
@@ -158,9 +169,12 @@ def add_service(request):
             service.created_by = request.user
             service.save()
             messages.success(request, "Service created successfully.")
+            # Redirect to the page if page was specified
+            if service.page:
+                return redirect("dynamic_page", slug=service.page.slug)
             return redirect("dashboard")
     else:
-        form = ServiceForm()
+        form = ServiceForm(initial=initial_data)
     return render(request, "core/service_form.html", {"form": form, "title": "Add Service"})
 
 
@@ -176,6 +190,9 @@ def edit_service(request, service_id):
         if form.is_valid():
             form.save()
             messages.success(request, "Service updated successfully.")
+            # Redirect to the page if page is assigned
+            if service.page:
+                return redirect("dynamic_page", slug=service.page.slug)
             return redirect("dashboard")
     else:
         form = ServiceForm(instance=service)
@@ -200,7 +217,13 @@ def delete_service(request, service_id):
 def service_detail(request, service_id):
     """Display detailed information about a service"""
     service = get_object_or_404(Service, id=service_id)
-    related_services = Service.objects.all().order_by("-created_at")[:6]
+    
+    # Get related services - show only services from the same page (or global if no page)
+    if service.page:
+        related_services = service.page.services.all().exclude(id=service_id).order_by("-created_at")[:6]
+    else:
+        related_services = Service.objects.filter(page__isnull=True).exclude(id=service_id).order_by("-created_at")[:6]
+    
     pages = DynamicPage.objects.all().order_by("name")
     
     context = {
@@ -242,7 +265,7 @@ def add_page(request):
 @login_required
 def dynamic_page_view(request, slug):
     page = get_object_or_404(DynamicPage, slug=slug)
-    services = Service.objects.all().order_by("-created_at")
+    services = page.services.all().order_by("-created_at")
     pages = DynamicPage.objects.all().order_by("name")
     
     # Get other pages (all except current)

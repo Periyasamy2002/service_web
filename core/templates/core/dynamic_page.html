@@ -132,7 +132,7 @@
 
 {% if user.is_authenticated and can_manage %}
 <div class="mb-3">
-    <a class="btn btn-primary" href="{% url 'add_service' %}">
+    <a class="btn btn-primary" href="{% url 'add_service' %}?page_id={{ page.id }}">
         <i class="fas fa-plus"></i> Add Service
     </a>
     <a class="btn btn-info" href="{% url 'pages_list' %}">

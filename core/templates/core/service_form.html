@@ -40,6 +40,12 @@
                             {{ form.apply_link }}
                             {% if form.apply_link.errors %}<div class="alert alert-danger mt-2">{{ form.apply_link.errors }}</div>{% endif %}
                         </div>
+                        <div class="col-12 zoom-in" style="animation-delay: 0.6s;">
+                            <label for="id_page" class="form-label"><i class="fas fa-folder icon-purple"></i> Assign to Page (Optional)</label>
+                            {{ form.page }}
+                            <small class="text-muted d-block mt-2"><i class="fas fa-info-circle"></i> Select a page to restrict this service to that page only. Leave empty for global access.</small>
+                            {% if form.page.errors %}<div class="alert alert-danger mt-2">{{ form.page.errors }}</div>{% endif %}
+                        </div>
                     </div>
                     <div class="mt-4 d-flex gap-2">
                         <button type="submit" class="btn btn-primary bounce-in">

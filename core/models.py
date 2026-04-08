@@ -24,6 +24,7 @@ class Service(models.Model):
     tutorial_link = models.URLField(blank=True, null=True)
     apply_link = models.URLField(blank=True, null=True)
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="services")
+    page = models.ForeignKey("DynamicPage", on_delete=models.CASCADE, related_name="services", null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def documents_list(self):
