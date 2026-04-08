@@ -1,0 +1,261 @@
+{% extends 'core/base.html' %}
+{% load custom_filters %}
+
+{% block title %}User Dashboard{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="page-header">
+    <h1 class="page-title">
+        <i class="fas fa-home"></i> Welcome, {{ user.first_name|default:user.username }}!
+    </h1>
+    <p class="page-subtitle">Browse and explore available services</p>
+</div>
+
+<!-- Search and Filter -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <form method="GET" class="row g-3">
+                    <div class="col-md-6">
+                        <label for="search" class="form-label">🔍 Search Services</label>
+                        <input type="text" class="form-control" id="search" name="search" 
+                               placeholder="Search by service name..." value="{{ search_query|default:'' }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="sort" class="form-label">Sort By</label>
+                        <select class="form-select" id="sort" name="sort">
+                            <option value="newest">Newest First</option>
+                            <option value="oldest">Oldest First</option>
+                            <option value="price-low">Price: Low to High</option>
+                            <option value="price-high">Price: High to Low</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end gap-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                        <a href="{% url 'dashboard' %}" class="btn btn-secondary">
+                            <i class="fas fa-redo"></i> Reset
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics -->
+<div class="row mb-4">
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-2">Total Services</h6>
+                        <h3 class="text-gradient mb-0">{{ service_count }}</h3>
+                    </div>
+                    <i class="fas fa-layer-group" style="font-size: 2.5rem; color: #667eea; opacity: 0.3;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-2">Categories</h6>
+                        <h3 class="text-gradient mb-0">{{ pages|length }}</h3>
+                    </div>
+                    <i class="fas fa-sitemap" style="font-size: 2.5rem; color: #667eea; opacity: 0.3;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-2">Status</h6>
+                        <p class="text-gradient mb-0">Active</p>
+                    </div>
+                    <i class="fas fa-check-circle" style="font-size: 2.5rem; color: #27ae60; opacity: 0.3;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-2">Member Since</h6>
+                        <p class="text-gradient mb-0">{{ user.date_joined|date:"M Y" }}</p>
+                    </div>
+                    <i class="fas fa-calendar" style="font-size: 2.5rem; color: #667eea; opacity: 0.3;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Featured Services -->
+{% if services %}
+<div class="row">
+    <div class="col-12">
+        <h4 class="mb-4">
+            <i class="fas fa-star"></i> Available Services
+            {% if search_query %}
+                <small class="text-muted">(Results for "{{ search_query }}")</small>
+            {% endif %}
+        </h4>
+    </div>
+</div>
+
+<div class="row">
+    {% for service in services %}
+    <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up">
+        <div class="card service-card h-100">
+            <div class="card-body">
+                <!-- Service Header -->
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <h5 class="card-title mb-1">{{ service.name }}</h5>
+                        <small class="text-muted">
+                            <i class="fas fa-user"></i> 
+                            {{ service.created_by.first_name|default:service.created_by.username }}
+                        </small>
+                    </div>
+                    <span class="badge badge-primary">
+                        <i class="fas fa-rupee"></i> {{ service.charges }}
+                    </span>
+                </div>
+                
+                <!-- Service Details -->
+                <div class="mb-3">
+                    <p class="text-muted small mb-2">
+                        <i class="fas fa-calendar"></i>
+                        <strong>Created:</strong> {{ service.created_at|date:"M d, Y" }}
+                    </p>
+                </div>
+                
+                <!-- Documents Required -->
+                {% if service.documents_required %}
+                <div class="mb-3 p-3 bg-light rounded">
+                    <p class="small font-weight-bold mb-2">
+                        <i class="fas fa-file"></i> Documents Required:
+                    </p>
+                    <ul class="small text-muted mb-0">
+                        {% for doc in service.documents_list %}
+                        <li><i class="fas fa-check-circle"></i> {{ doc }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% else %}
+                <div class="alert alert-info p-2 small mb-3">
+                    <i class="fas fa-info-circle"></i> No documents required
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Card Footer with Actions -->
+            <div class="card-footer bg-light border-top">
+                <div class="d-flex gap-2">
+                    {% if service.tutorial_link %}
+                    <a href="{{ service.tutorial_link }}" class="btn btn-info btn-sm flex-fill" target="_blank">
+                        <i class="fas fa-play-circle"></i> Tutorial
+                    </a>
+                    {% endif %}
+                    
+                    {% if service.apply_link %}
+                    <a href="{{ service.apply_link }}" class="btn btn-success btn-sm flex-fill" target="_blank">
+                        <i class="fas fa-external-link-alt"></i> Apply Now
+                    </a>
+                    {% else %}
+                    <button class="btn btn-outline-primary btn-sm flex-fill" disabled>
+                        <i class="fas fa-lock"></i> Coming Soon
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="row">
+    <div class="col-12">
+        <div class="alert alert-info alert-lg">
+            <i class="fas fa-info-circle"></i>
+            <h5>No services found</h5>
+            <p class="mb-0">
+                {% if search_query %}
+                    No services match your search. Try a different search term.
+                {% else %}
+                    Services will be available soon. Check back later!
+                {% endif %}
+            </p>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Pages/Categories Section -->
+{% if pages %}
+<div class="row mt-5">
+    <div class="col-12">
+        <h4 class="mb-4"><i class="fas fa-folder-open"></i> Explore Categories</h4>
+    </div>
+    {% for page in pages %}
+    <div class="col-md-6 col-lg-4 mb-4">
+        <a href="{% url 'dynamic_page' slug=page.slug %}" class="card text-decoration-none h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-folder-open" style="font-size: 3rem; color: #667eea; margin-bottom: 1rem;"></i>
+                <h5 class="card-title">{{ page.name }}</h5>
+                {% if page.description %}
+                <p class="card-text small text-muted">{{ page.description|truncatewords:15 }}</p>
+                {% endif %}
+            </div>
+        </a>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<style>
+    .service-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+    }
+    
+    .service-card:hover {
+        box-shadow: 0 20px 40px rgba(102, 126, 234, 0.2) !important;
+        transform: translateY(-8px);
+    }
+    
+    .card-footer {
+        padding: 1rem !important;
+    }
+    
+    .text-gradient {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .badge-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    }
+    
+    .alert-lg {
+        padding: 2rem !important;
+    }
+</style>
+{% endblock %}

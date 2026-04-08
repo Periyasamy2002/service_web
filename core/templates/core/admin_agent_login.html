@@ -1,508 +1,184 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin & Agent Login</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <style>
-        * {
-            font-family: 'Poppins', sans-serif;
-        }
+{% extends 'core/base.html' %}
 
-        .card {
-            transition: all 0.3s ease;
-        }
+{% block title %}{% if is_admin %}Admin Login{% else %}Agent/User Login{% endif %}{% endblock %}
 
-        .card:hover {
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-            transform: translateY(-8px);
-        }
-
-        .edit-btn {
-            transition: all 0.3s ease;
-        }
-
-        .edit-btn:hover {
-            background-color: #3b82f6;
-            transform: scale(1.1);
-        }
-
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-            z-index: 50;
-        }
-
-        .modal-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .modal-content {
-            background-color: white;
-            border-radius: 16px;
-            padding: 40px;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
-            max-width: 500px;
-            width: 90%;
-            transform: scale(0.9);
-            transition: transform 0.3s ease;
-        }
-
-        .modal-overlay.active .modal-content {
-            transform: scale(1);
-        }
-
-        .input-field {
-            transition: all 0.3s ease;
-        }
-
-        .input-field:focus {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-            outline: none;
-        }
-
-        .btn-primary {
-            transition: all 0.3s ease;
-        }
-
-        .btn-primary:hover:not(:disabled) {
-            background-color: #059669;
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(5, 150, 105, 0.3);
-        }
-
-        .btn-secondary {
-            transition: all 0.3s ease;
-        }
-
-        .btn-secondary:hover {
-            background-color: #ef4444;
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(239, 68, 68, 0.3);
-        }
-
-        .btn-cancel {
-            transition: all 0.3s ease;
-        }
-
-        .btn-cancel:hover {
-            background-color: #e5e7eb;
-        }
-
-        .btn-login {
-            transition: all 0.3s ease;
-        }
-
-        .btn-login:hover {
-            background-color: #2563eb;
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
-        }
-
-        .badge-admin {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-
-        .badge-agent {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        }
-
-        .icon-animation {
-            animation: float 3s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0%, 100% {
-                transform: translateY(0px);
-            }
-            50% {
-                transform: translateY(-10px);
-            }
-        }
-
-        .login-form {
-            animation: slideUp 0.4s ease-out;
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .feature-list {
-            list-style: none;
-            padding: 0;
-        }
-
-        .feature-list li {
-            padding: 10px 0;
-            border-bottom: 1px solid #f3f4f6;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .feature-list li:last-child {
-            border-bottom: none;
-        }
-
-        .feature-list svg {
-            width: 20px;
-            height: 20px;
-            flex-shrink: 0;
-        }
-    </style>
-</head>
-<body class="bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100 min-h-screen">
-    <div class="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-6xl mx-auto">
-            <!-- Header Section -->
-            <div class="text-center mb-16">
-                <h1 class="text-5xl font-bold text-gray-900 mb-4">Welcome Back</h1>
-                <p class="text-xl text-gray-600">Select your role to access the dashboard</p>
-                <div class="w-24 h-1 bg-gradient-to-r from-blue-500 to-indigo-600 mx-auto mt-6 rounded-full"></div>
-            </div>
-
-            <!-- Login Cards Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+{% block content %}
+<div style="min-height: calc(100vh - 70px); display: flex; align-items: center; justify-content: center; padding: 2rem;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-5 col-md-6">
+                <div class="card shadow-lg">
+                    <div class="card-body p-5">
+                        <!-- Header -->
+                        <div class="text-center mb-4">
+                            {% if is_admin %}
+                            <i class="fas fa-crown" style="font-size: 3rem; color: #e74c3c;"></i>
+                            <h3 class="mt-3 mb-2">Admin Login</h3>
+                            <p class="text-muted">Secure access for administrators only</p>
+                            {% else %}
+                            <i class="fas fa-user-circle" style="font-size: 3rem; color: #667eea;"></i>
+                            <h3 class="mt-3 mb-2">Login to Your Account</h3>
+                            <p class="text-muted">Enter your credentials to continue</p>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Alerts -->
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            {% for error in form.non_field_errors %}
+                                <div>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Form -->
+                        <form method="POST" class="form-group">
+                            {% csrf_token %}
+                            
+                            <!-- Username Field -->
+                            <div class="mb-3">
+                                <label for="id_username" class="form-label">
+                                    <i class="fas fa-user"></i> Username
+                                </label>
+                                <input type="text" class="form-control form-control-lg" 
+                                       id="id_username" name="username" 
+                                       placeholder="Enter your username" required
+                                       {% if form.username.value %}value="{{ form.username.value }}"{% endif %}>
+                                {% if form.username.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.username.errors %}{{ error }}{% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Password Field -->
+                            <div class="mb-3">
+                                <label for="id_password" class="form-label">
+                                    <i class="fas fa-lock"></i> Password
+                                </label>
+                                <input type="password" class="form-control form-control-lg" 
+                                       id="id_password" name="password" 
+                                       placeholder="Enter your password" required>
+                                {% if form.password.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.password.errors %}{{ error }}{% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Remember Me -->
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="remember" name="remember">
+                                <label class="form-check-label" for="remember">
+                                    Remember me
+                                </label>
+                            </div>
+                            
+                            <!-- Submit Button -->
+                            <button type="submit" class="btn btn-primary w-100 btn-lg mb-3">
+                                <i class="fas fa-sign-in-alt"></i> 
+                                {% if is_admin %}Login as Admin{% else %}Login{% endif %}
+                            </button>
+                        </form>
+                        
+                        <!-- Divider -->
+                        <hr class="my-4">
+                        
+                        <!-- Footer Links -->
+                        <div class="text-center">
+                            {% if is_admin %}
+                            <p class="mb-2">
+                                <small class="text-muted">
+                                    Are you a regular user or agent?
+                                    <a href="{% url 'login' %}" class="text-decoration-none">Login here</a>
+                                </small>
+                            </p>
+                            {% else %}
+                            <p class="mb-2">
+                                <small class="text-muted">
+                                    Don't have an account?
+                                    <a href="{% url 'register' %}" class="text-decoration-none">Sign up here</a>
+                                </small>
+                            </p>
+                            <p class="mb-0">
+                                <small class="text-muted">
+                                    Are you an admin?
+                                    <a href="{% url 'admin_login' %}" class="text-decoration-none">Admin login</a>
+                                </small>
+                            </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
                 
-                <!-- Admin Card -->
-                <div class="card bg-white rounded-3xl shadow-lg overflow-hidden">
-                    <!-- Card Header -->
-                    <div class="badge-admin p-8 text-white relative overflow-hidden">
-                        <div class="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -mr-16 -mt-16"></div>
-                        <div class="relative z-10 flex justify-between items-start">
-                            <div>
-                                <h2 class="text-3xl font-bold mb-2">Admin Panel</h2>
-                                <p class="text-white opacity-90">System Administrator Access</p>
-                            </div>
-                            <button class="edit-btn bg-white text-purple-600 p-3 rounded-lg hover:bg-gray-100 transition-all" onclick="openModal('admin')">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Card Content -->
-                    <div class="p-8">
-                        <!-- Icon -->
-                        <div class="mb-6 flex justify-center">
-                            <div class="icon-animation bg-purple-100 p-4 rounded-full">
-                                <svg class="w-12 h-12 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
-                                </svg>
-                            </div>
-                        </div>
-
-                        <!-- Features -->
-                        <div class="mb-8">
-                            <h3 class="font-semibold text-gray-900 mb-4">Access Features:</h3>
-                            <ul class="feature-list">
-                                <li>
-                                    <svg class="text-purple-600" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                                    </svg>
-                                    <span class="text-gray-700">Manage All Services</span>
-                                </li>
-                                <li>
-                                    <svg class="text-purple-600" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                                    </svg>
-                                    <span class="text-gray-700">User Management</span>
-                                </li>
-                                <li>
-                                    <svg class="text-purple-600" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                                    </svg>
-                                    <span class="text-gray-700">View Analytics</span>
-                                </li>
-                                <li>
-                                    <svg class="text-purple-600" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                                    </svg>
-                                    <span class="text-gray-700">System Settings</span>
-                                </li>
-                            </ul>
-                        </div>
-
-                        <!-- Login Button -->
-                        <button onclick="openLoginModal('admin')" class="w-full btn-login bg-gradient-to-r from-purple-600 to-purple-700 text-white font-semibold py-3 rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all flex items-center justify-center gap-2">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
-                            </svg>
-                            Admin Login
-                        </button>
-                    </div>
+                <!-- Security Notice -->
+                <div class="alert alert-info mt-4" role="alert">
+                    <i class="fas fa-shield-alt"></i>
+                    <small>
+                        <strong>Security Notice:</strong> This is a secure login page. Never share your password with anyone.
+                    </small>
                 </div>
-
-                <!-- Agent Card -->
-                <div class="card bg-white rounded-3xl shadow-lg overflow-hidden">
-                    <!-- Card Header -->
-                    <div class="badge-agent p-8 text-white relative overflow-hidden">
-                        <div class="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -mr-16 -mt-16"></div>
-                        <div class="relative z-10 flex justify-between items-start">
-                            <div>
-                                <h2 class="text-3xl font-bold mb-2">Agent Portal</h2>
-                                <p class="text-white opacity-90">Service Agent Access</p>
-                            </div>
-                            <button class="edit-btn bg-white text-pink-600 p-3 rounded-lg hover:bg-gray-100 transition-all" onclick="openModal('agent')">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Card Content -->
-                    <div class="p-8">
-                        <!-- Icon -->
-                        <div class="mb-6 flex justify-center">
-                            <div class="icon-animation bg-pink-100 p-4 rounded-full">
-                                <svg class="w-12 h-12 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
-                                </svg>
-                            </div>
-                        </div>
-
-                        <!-- Features -->
-                        <div class="mb-8">
-                            <h3 class="font-semibold text-gray-900 mb-4">Access Features:</h3>
-                            <ul class="feature-list">
-                                <li>
-                                    <svg class="text-pink-600" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                                    </svg>
-                                    <span class="text-gray-700">View Assigned Tasks</span>
-                                </li>
-                                <li>
-                                    <svg class="text-pink-600" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                                    </svg>
-                                    <span class="text-gray-700">Update Service Status</span>
-                                </li>
-                                <li>
-                                    <svg class="text-pink-600" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                                    </svg>
-                                    <span class="text-gray-700">Manage Documents</span>
-                                </li>
-                                <li>
-                                    <svg class="text-pink-600" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                                    </svg>
-                                    <span class="text-gray-700">Track Applications</span>
-                                </li>
-                            </ul>
-                        </div>
-
-                        <!-- Login Button -->
-                        <button onclick="openLoginModal('agent')" class="w-full btn-login bg-gradient-to-r from-pink-600 to-red-600 text-white font-semibold py-3 rounded-lg hover:from-pink-700 hover:to-red-700 transition-all flex items-center justify-center gap-2">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
-                            </svg>
-                            Agent Login
-                        </button>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- Footer -->
-            <div class="text-center mt-16">
-                <p class="text-gray-600">Need Help? <a href="#" class="text-blue-600 font-semibold hover:text-blue-700">Contact Support</a></p>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Edit Credentials Modal -->
-    <div id="editModal" class="modal-overlay">
-        <div class="modal-content">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold text-gray-900">Edit Credentials</h2>
-                <button onclick="closeModal('editModal')" class="text-gray-500 hover:text-gray-700">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
-            </div>
-
-            <form id="editForm" onsubmit="saveCredentials(event)" class="login-form">
-                <div class="mb-4">
-                    <label class="block text-gray-700 font-medium mb-2">Username</label>
-                    <input type="text" id="editUsername" class="input-field w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500" placeholder="Enter username" required>
-                </div>
-
-                <div class="mb-4">
-                    <label class="block text-gray-700 font-medium mb-2">Email</label>
-                    <input type="email" id="editEmail" class="input-field w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500" placeholder="Enter email" required>
-                </div>
-
-                <div class="mb-6">
-                    <label class="block text-gray-700 font-medium mb-2">Password</label>
-                    <input type="password" id="editPassword" class="input-field w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500" placeholder="Enter new password (optional)">
-                </div>
-
-                <div class="flex gap-3">
-                    <button type="submit" class="flex-1 btn-primary bg-green-600 text-white font-medium py-2 rounded-lg hover:bg-green-700">
-                        Save Credentials
-                    </button>
-                    <button type="button" onclick="closeModal('editModal')" class="flex-1 btn-cancel bg-gray-200 text-gray-800 font-medium py-2 rounded-lg hover:bg-gray-300">
-                        Cancel
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Login Modal -->
-    <div id="loginModal" class="modal-overlay">
-        <div class="modal-content">
-            <div class="text-center mb-8">
-                <h2 class="text-3xl font-bold text-gray-900" id="loginTitle">Admin Login</h2>
-                <p class="text-gray-600 mt-2" id="loginSubtitle">Enter your credentials to continue</p>
-            </div>
-
-            <form id="loginForm" onsubmit="handleLogin(event)" class="login-form">
-                <div class="mb-4">
-                    <label class="block text-gray-700 font-medium mb-2">Username</label>
-                    <input type="text" id="loginUsername" class="input-field w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500" placeholder="Enter your username" required>
-                </div>
-
-                <div class="mb-6">
-                    <label class="block text-gray-700 font-medium mb-2">Password</label>
-                    <input type="password" id="loginPassword" class="input-field w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500" placeholder="Enter your password" required>
-                </div>
-
-                <div class="flex items-center mb-6">
-                    <input type="checkbox" id="rememberMe" class="w-4 h-4 text-blue-600">
-                    <label for="rememberMe" class="ml-2 text-gray-700">Remember me</label>
-                </div>
-
-                <button type="submit" class="w-full btn-primary bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
-                    </svg>
-                    <span id="loginBtnText">Login as Admin</span>
-                </button>
-
-                <button type="button" onclick="closeModal('loginModal')" class="w-full btn-cancel bg-gray-200 text-gray-800 font-medium py-2 rounded-lg hover:bg-gray-300 mt-3">
-                    Back
-                </button>
-            </form>
-
-            <div class="mt-6 pt-6 border-t border-gray-200">
-                <p class="text-center text-gray-600 text-sm">
-                    Don't have an account? <a href="#" class="text-blue-600 font-semibold hover:text-blue-700">Sign up</a>
-                </p>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        const credentials = {
-            admin: { username: 'admin', email: 'admin@example.com', password: '****' },
-            agent: { username: 'agent', email: 'agent@example.com', password: '****' }
-        };
-
-        let currentRole = null;
-
-        function openModal(role) {
-            currentRole = role;
-            const cred = credentials[role];
-            document.getElementById('editUsername').value = cred.username;
-            document.getElementById('editEmail').value = cred.email;
-            document.getElementById('editPassword').value = '';
-            document.getElementById('editModal').classList.add('active');
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('active');
-        }
-
-        function saveCredentials(event) {
-            event.preventDefault();
-            const username = document.getElementById('editUsername').value;
-            const email = document.getElementById('editEmail').value;
-            
-            if (currentRole) {
-                credentials[currentRole] = {
-                    username: username,
-                    email: email,
-                    password: credentials[currentRole].password
-                };
-                alert(`${currentRole.charAt(0).toUpperCase() + currentRole.slice(1)} credentials updated successfully!`);
-                closeModal('editModal');
-            }
-        }
-
-        function openLoginModal(role) {
-            currentRole = role;
-            const roleTitle = role === 'admin' ? 'Admin' : 'Agent';
-            document.getElementById('loginTitle').textContent = `${roleTitle} Login`;
-            document.getElementById('loginSubtitle').textContent = `Enter your ${role} credentials to access the portal`;
-            document.getElementById('loginBtnText').textContent = `Login as ${roleTitle}`;
-            document.getElementById('loginModal').classList.add('active');
-        }
-
-        function handleLogin(event) {
-            event.preventDefault();
-            const username = document.getElementById('loginUsername').value;
-            const password = document.getElementById('loginPassword').value;
-            const rememberMe = document.getElementById('rememberMe').checked;
-
-            // Simulated login
-            alert(`Logging in as ${currentRole}:\nUsername: ${username}\nRemember: ${rememberMe ? 'Yes' : 'No'}`);
-            
-            // In a real application, send credentials to backend
-            // window.location.href = `/admin-dashboard/` or `/agent-dashboard/`
-            
-            closeModal('loginModal');
-        }
-
-        // Close modal when clicking outside
-        document.getElementById('editModal').addEventListener('click', function(event) {
-            if (event.target === this) {
-                closeModal('editModal');
-            }
-        });
-
-        document.getElementById('loginModal').addEventListener('click', function(event) {
-            if (event.target === this) {
-                closeModal('loginModal');
-            }
-        });
-
-        // Form validation
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            const username = document.getElementById('loginUsername').value.trim();
-            const password = document.getElementById('loginPassword').value.trim();
-            
-            if (!username || !password) {
-                e.preventDefault();
-                alert('Please fill in all fields');
-            }
-        });
-    </script>
-</body>
-</html>
+<style>
+    .card {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+    }
+    
+    .form-control-lg {
+        border-radius: 8px;
+        border: 2px solid #e0e0e0;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control-lg:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .btn-lg {
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
+    
+    .alert-info {
+        background: linear-gradient(135deg, rgba(52, 152, 219, 0.1) 0%, rgba(41, 128, 185, 0.1) 100%);
+        border-left: 4px solid #3498db;
+        color: #2980b9;
+    }
+</style>
+{% endblock %}

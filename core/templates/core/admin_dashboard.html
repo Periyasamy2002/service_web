@@ -1,0 +1,233 @@
+{% extends 'core/base.html' %}
+{% load custom_filters %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="page-header">
+    <h1 class="page-title">
+        <i class="fas fa-tachometer-alt"></i> Admin Dashboard
+    </h1>
+    <p class="page-subtitle">Complete control over all system resources and users</p>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-2">Total Users</h6>
+                        <h3 class="text-gradient mb-0">{{ total_users }}</h3>
+                    </div>
+                    <i class="fas fa-users" style="font-size: 2.5rem; color: #667eea; opacity: 0.3;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-2">Agents</h6>
+                        <h3 class="text-gradient mb-0">{{ total_agents }}</h3>
+                    </div>
+                    <i class="fas fa-user-tie" style="font-size: 2.5rem; color: #667eea; opacity: 0.3;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-2">Regular Users</h6>
+                        <h3 class="text-gradient mb-0">{{ total_regular_users }}</h3>
+                    </div>
+                    <i class="fas fa-user" style="font-size: 2.5rem; color: #667eea; opacity: 0.3;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-2">Services</h6>
+                        <h3 class="text-gradient mb-0">{{ service_count }}</h3>
+                    </div>
+                    <i class="fas fa-cogs" style="font-size: 2.5rem; color: #667eea; opacity: 0.3;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-bolt"></i> Quick Actions
+            </div>
+            <div class="card-body">
+                <a href="{% url 'add_service' %}" class="btn btn-primary m-2">
+                    <i class="fas fa-plus"></i> Create New Service
+                </a>
+                <a href="{% url 'add_page' %}" class="btn btn-info m-2">
+                    <i class="fas fa-file-plus"></i> Add Dynamic Page
+                </a>
+                <a href="{% url 'user_list' %}" class="btn btn-success m-2">
+                    <i class="fas fa-list"></i> View All Users
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Services Section -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-layer-group"></i> Services Management
+                <a href="{% url 'add_service' %}" class="btn btn-primary btn-sm float-end">
+                    <i class="fas fa-plus"></i> Create Service
+                </a>
+            </div>
+            <div class="card-body">
+                {% if services %}
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Service Name</th>
+                                <th>Charges</th>
+                                <th>Created By</th>
+                                <th>Documents Required</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for service in services %}
+                            <tr>
+                                <td>
+                                    <strong>{{ service.name }}</strong>
+                                </td>
+                                <td>
+                                    <span class="badge badge-primary">₹ {{ service.charges }}</span>
+                                </td>
+                                <td>{{ service.created_by.first_name|default:service.created_by.username }}</td>
+                                <td>
+                                    {% if service.documents_required %}
+                                        <small>{{ service.documents_required|truncatewords:3 }}</small>
+                                    {% else %}
+                                        <small class="text-muted">None</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'edit_service' service.id %}" class="btn btn-info btn-sm">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'delete_service' service.id %}" class="btn btn-danger btn-sm">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> No services available. 
+                    <a href="{% url 'add_service' %}">Create one now</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Users Management -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-users"></i> Users Management
+                <a href="{% url 'user_list' %}" class="btn btn-primary btn-sm float-end">
+                    <i class="fas fa-list"></i> View All
+                </a>
+            </div>
+            <div class="card-body">
+                {% if users %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Joined</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users|slice:":5" %}
+                            <tr>
+                                <td><strong>{{ user.username }}</strong></td>
+                                <td>{{ user.email }}</td>
+                                <td>
+                                    <span class="badge" style="background: 
+                                        {% if user.profile.role == 'admin' %}linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)
+                                        {% elif user.profile.role == 'agent' %}linear-gradient(135deg, #f39c12 0%, #d68910 100%)
+                                        {% else %}linear-gradient(135deg, #667eea 0%, #764ba2 100%)
+                                        {% endif %}; color: white;">
+                                        {{ user.profile.get_role_display }}
+                                    </span>
+                                </td>
+                                <td>{{ user.date_joined|date:"M d, Y" }}</td>
+                                <td>
+                                    <a href="{% url 'edit_user' user.id %}" class="btn btn-info btn-sm">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="text-center mt-3">
+                    <a href="{% url 'user_list' %}" class="btn btn-outline-primary">View All Users</a>
+                </div>
+                {% else %}
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i> No users found
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .text-gradient {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .badge-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    }
+</style>
+{% endblock %}

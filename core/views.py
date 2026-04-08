@@ -56,6 +56,31 @@ def login_view(request):
     return render(request, "core/login.html", {"form": form})
 
 
+def admin_login(request):
+    """Admin-only login page"""
+    if request.user.is_authenticated:
+        if _user_role(request.user) == "admin":
+            return redirect("dashboard")
+        return redirect("login_board")
+    
+    if request.method == "POST":
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            # Check if user is admin
+            if hasattr(user, 'profile') and user.profile.role == "admin":
+                login(request, user)
+                messages.success(request, f"Welcome, {user.first_name or user.username}!")
+                return redirect("dashboard")
+            else:
+                messages.error(request, "You do not have admin access. Please use the regular login.")
+                return render(request, "core/admin_agent_login.html", {"form": form, "is_admin": True})
+        messages.error(request, "Invalid username or password.")
+    else:
+        form = AuthenticationForm()
+    return render(request, "core/admin_agent_login.html", {"form": form, "is_admin": True})
+
+
 def login_board(request):
     if request.user.is_authenticated:
         return redirect("dashboard")
@@ -64,23 +89,60 @@ def login_board(request):
 
 def logout_view(request):
     logout(request)
-    return redirect("login")
+    return redirect("login_board")
 
 
 @login_required
 def dashboard(request):
+    role = _user_role(request.user)
+    
+    # Redirect to login board if user is not authenticated
+    if role == "anonymous":
+        return redirect("login_board")
+    
+    # Only Admin and Agent dashboards are available
+    # Regular users are redirected to a landing page or can view it as read-only
+    if role not in ["admin", "agent"]:
+        # Users can still view the dashboard but in read-only mode
+        pass
+    
+    # Get base context data
     services = Service.objects.all().order_by("-created_at")
     pages = DynamicPage.objects.all().order_by("name")
-    role = _user_role(request.user)
+    
+    # Filter services based on search query
+    search_query = request.GET.get('search', '')
+    if search_query:
+        services = services.filter(name__icontains=search_query)
+    
     context = {
         "services": services,
         "pages": pages,
         "role": role,
         "can_manage": _can_manage_services(request.user),
-        "page_title": "Service Dashboard",
-        "page_description": "Browse and manage services based on your role.",
+        "page_title": f"{role.capitalize()} Dashboard",
+        "page_description": f"Welcome to your {role} dashboard.",
+        "search_query": search_query,
+        "service_count": services.count(),
     }
-    return render(request, "core/dashboard.html", context)
+    
+    # Add role-specific context
+    if role == "admin":
+        context.update({
+            "users": User.objects.all().order_by("-date_joined"),
+            "total_users": User.objects.count(),
+            "total_agents": User.objects.filter(profile__role="agent").count(),
+            "total_regular_users": User.objects.filter(profile__role="user").count(),
+        })
+    elif role == "agent":
+        # Count services created by this agent
+        user_services = Service.objects.filter(created_by=request.user)
+        context.update({
+            "user_services_count": user_services.count(),
+        })
+    
+    # Use unified dashboard template for all authenticated users
+    return render(request, "core/unified_dashboard.html", context)
 
 
 @login_required
@@ -135,6 +197,24 @@ def delete_service(request, service_id):
 
 
 @login_required
+def service_detail(request, service_id):
+    """Display detailed information about a service"""
+    service = get_object_or_404(Service, id=service_id)
+    related_services = Service.objects.all().order_by("-created_at")[:6]
+    pages = DynamicPage.objects.all().order_by("name")
+    
+    context = {
+        "service": service,
+        "related_services": related_services,
+        "pages": pages,
+        "role": _user_role(request.user),
+        "can_manage": _can_manage_services(request.user),
+    }
+    
+    return render(request, "core/service_detail.html", context)
+
+
+@login_required
 def add_page(request):
     if not _has_agent_permissions(request.user):
         messages.error(request, "You do not have permission to add dynamic pages.")
@@ -164,6 +244,15 @@ def dynamic_page_view(request, slug):
     page = get_object_or_404(DynamicPage, slug=slug)
     services = Service.objects.all().order_by("-created_at")
     pages = DynamicPage.objects.all().order_by("name")
+    
+    # Get other pages (all except current)
+    other_pages = DynamicPage.objects.exclude(id=page.id).order_by("name")
+    
+    # Filter services based on search query
+    search_query = request.GET.get('service_search', '')
+    if search_query:
+        services = services.filter(name__icontains=search_query)
+    
     return render(
         request,
         "core/dynamic_page.html",
@@ -171,10 +260,34 @@ def dynamic_page_view(request, slug):
             "page": page,
             "services": services,
             "pages": pages,
+            "other_pages": other_pages,
             "role": _user_role(request.user),
             "can_manage": _can_manage_services(request.user),
             "page_title": page.name,
             "page_description": page.description or "Custom dynamic page",
+            "search_query": search_query,
+        },
+    )
+
+
+@login_required
+def pages_list(request):
+    """Display all pages in card format"""
+    pages = DynamicPage.objects.all().order_by("name")
+    
+    # Filter pages based on search query
+    search_query = request.GET.get('search', '')
+    if search_query:
+        pages = pages.filter(name__icontains=search_query)
+    
+    return render(
+        request,
+        "core/pages_list.html",
+        {
+            "pages": pages,
+            "role": _user_role(request.user),
+            "can_manage": _can_manage_services(request.user),
+            "search_query": search_query,
         },
     )
 

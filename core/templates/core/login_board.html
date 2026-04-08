@@ -1,72 +1,231 @@
 {% extends 'core/base.html' %}
-{% block title %}Login Board{% endblock %}
+
+{% block title %}Choose Login Type{% endblock %}
+
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-lg-10">
-        <h1 class="text-center mb-2 fade-in">
-            <i class="fas fa-sign-in-alt icon-blue"></i> Choose Your Login Type
-        </h1>
-        <p class="text-center text-muted mb-5 fade-in" style="animation-delay: 0.1s;">
-            <i class="fas fa-shield-alt"></i> Select your role to proceed
-        </p>
-        <div class="row g-4">
-            <div class="col-md-4">
-                <div class="card h-100 fade-in flip" style="animation-delay: 0.2s;">
+<div style="min-height: calc(100vh - 70px); display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 2rem;">
+    <div class="container">
+        <!-- Page Header -->
+        <div class="text-center mb-5">
+            <h1 style="color: white; font-weight: 700; font-size: 2.5rem; margin-bottom: 1rem;">
+                <i class="fas fa-sign-in-alt"></i> Choose Your Login Type
+            </h1>
+            <p style="color: rgba(255, 255, 255, 0.8); font-size: 1.1rem;">
+                <i class="fas fa-shield-alt"></i> Select your role to proceed
+            </p>
+        </div>
+        
+        <!-- Login Options -->
+        <div class="row justify-content-center g-4">
+            <!-- Admin Login -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 login-card admin-card">
                     <div class="card-body text-center p-5">
-                        <div class="mb-4">
-                            <i class="fas fa-crown fa-4x text-warning glow"></i>
+                        <div class="icon-wrapper admin-icon mb-4">
+                            <i class="fas fa-crown"></i>
                         </div>
                         <h5 class="card-title mb-3">Admin Login</h5>
-                        <p class="card-text text-muted mb-4">
-                            <i class="fas fa-info-circle"></i> Access full administrative controls and manage all services and users.
+                        <p class="card-text text-muted mb-4 small">
+                            <i class="fas fa-info-circle"></i> Full access to all administrative controls. Manage services, users, and system settings.
                         </p>
-                        <a href="{% url 'login' %}" class="btn btn-warning w-100 bounce-in">
-                            <i class="fas fa-lock-open"></i> Login as Admin
+                        <div class="features mb-4">
+                            <p class="small mb-2"><i class="fas fa-check"></i> Manage all users</p>
+                            <p class="small mb-2"><i class="fas fa-check"></i> Create services</p>
+                            <p class="small"><i class="fas fa-check"></i> System analytics</p>
+                        </div>
+                        <a href="{% url 'admin_login' %}" class="btn btn-danger w-100">
+                            <i class="fas fa-lock-open"></i> Admin Login
                         </a>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card h-100 fade-in flip" style="animation-delay: 0.3s;">
+            
+            <!-- Agent Login -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 login-card agent-card">
                     <div class="card-body text-center p-5">
-                        <div class="mb-4">
-                            <i class="fas fa-user-tie fa-4x text-info glow"></i>
+                        <div class="icon-wrapper agent-icon mb-4">
+                            <i class="fas fa-user-tie"></i>
                         </div>
                         <h5 class="card-title mb-3">Agent Login</h5>
-                        <p class="card-text text-muted mb-4">
-                            <i class="fas fa-info-circle"></i> Manage services and assist users with their requests.
+                        <p class="card-text text-muted mb-4 small">
+                            <i class="fas fa-info-circle"></i> Create and manage services, assist users, and track your services.
                         </p>
-                        <a href="{% url 'login' %}" class="btn btn-info w-100 bounce-in">
-                            <i class="fas fa-lock-open"></i> Login as Agent
+                        <div class="features mb-4">
+                            <p class="small mb-2"><i class="fas fa-check"></i> Create services</p>
+                            <p class="small mb-2"><i class="fas fa-check"></i> Manage services</p>
+                            <p class="small"><i class="fas fa-check"></i> View requests</p>
+                        </div>
+                        <a href="{% url 'login' %}" class="btn btn-warning w-100">
+                            <i class="fas fa-lock-open"></i> Agent Login
                         </a>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card h-100 fade-in flip" style="animation-delay: 0.4s;">
+            
+            <!-- User Login -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 login-card user-card">
                     <div class="card-body text-center p-5">
-                        <div class="mb-4">
-                            <i class="fas fa-user fa-4x text-success glow"></i>
+                        <div class="icon-wrapper user-icon mb-4">
+                            <i class="fas fa-user"></i>
                         </div>
                         <h5 class="card-title mb-3">User Login</h5>
-                        <p class="card-text text-muted mb-4">
-                            <i class="fas fa-info-circle"></i> Browse services and manage your account.
+                        <p class="card-text text-muted mb-4 small">
+                            <i class="fas fa-info-circle"></i> Browse available services, view details, and apply for services.
                         </p>
-                        <a href="{% url 'login' %}" class="btn btn-success w-100 bounce-in">
-                            <i class="fas fa-lock-open"></i> Login as User
+                        <div class="features mb-4">
+                            <p class="small mb-2"><i class="fas fa-check"></i> Browse services</p>
+                            <p class="small mb-2"><i class="fas fa-check"></i> Apply for services</p>
+                            <p class="small"><i class="fas fa-check"></i> Save preferences</p>
+                        </div>
+                        <a href="{% url 'login' %}" class="btn btn-primary w-100">
+                            <i class="fas fa-lock-open"></i> User Login
                         </a>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="text-center mt-5 fade-in" style="animation-delay: 0.5s;">
-            <p class="text-muted">
-                <i class="fas fa-mouse"></i> Don't have an account? 
-                <a href="{% url 'register' %}" class="fw-bold text-decoration-none">
-                    <i class="fas fa-user-plus"></i> Register here
-                </a>
-            </p>
+        
+        <!-- Registration Section -->
+        <div class="row justify-content-center mt-5">
+            <div class="col-lg-8">
+                <div class="card" style="background: rgba(255, 255, 255, 0.95); border: 2px solid rgba(255, 255, 255, 0.3);">
+                    <div class="card-body text-center p-4">
+                        <h5 class="mb-3"><i class="fas fa-user-plus"></i> New User?</h5>
+                        <p class="text-muted mb-3">
+                            Don't have an account yet? Sign up now to join our community and access all services.
+                        </p>
+                        <a href="{% url 'register' %}" class="btn btn-success btn-lg">
+                            <i class="fas fa-user-check"></i> Create Account
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+<style>
+    .login-card {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+        position: relative;
+        background: white;
+        transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    
+    .login-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        transition: all 0.3s ease;
+    }
+    
+    .admin-card::before {
+        background: linear-gradient(90deg, #e74c3c, #c0392b);
+    }
+    
+    .agent-card::before {
+        background: linear-gradient(90deg, #f39c12, #d68910);
+    }
+    
+    .user-card::before {
+        background: linear-gradient(90deg, #667eea, #764ba2);
+    }
+    
+    .login-card:hover {
+        transform: translateY(-15px);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+    }
+    
+    .icon-wrapper {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+        font-size: 2.5rem;
+        color: white;
+        animation: float 3s ease-in-out infinite;
+    }
+    
+    .admin-icon {
+        background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    }
+    
+    .agent-icon {
+        background: linear-gradient(135deg, #f39c12 0%, #d68910 100%);
+    }
+    
+    .user-icon {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    @keyframes float {
+        0%, 100% {
+            transform: translateY(0px);
+        }
+        50% {
+            transform: translateY(-20px);
+        }
+    }
+    
+    .card-title {
+        color: #2c3e50;
+        font-weight: 700;
+        font-size: 1.3rem;
+    }
+    
+    .features p {
+        color: #2c3e50;
+        margin: 0;
+    }
+    
+    .features i {
+        color: #27ae60;
+        margin-right: 0.5rem;
+    }
+    
+    .btn {
+        border-radius: 8px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        padding: 0.6rem 1.5rem;
+        transition: all 0.3s ease;
+        border: none;
+    }
+    
+    .btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .btn-danger {
+        background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        color: white;
+    }
+    
+    .btn-warning {
+        background: linear-gradient(135deg, #f39c12 0%, #d68910 100%);
+        color: white;
+    }
+    
+    .btn-success {
+        background: linear-gradient(135deg, #27ae60 0%, #16a085 100%);
+        color: white;
+    }
+</style>
 {% endblock %}
